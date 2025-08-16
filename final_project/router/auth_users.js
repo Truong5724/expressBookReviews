@@ -65,12 +65,25 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
     let review = req.query.review;
     let user = req.session.authorization["username"];
 
-    let filter_book = books[isbn];
-    filter_book.review[user] = review;
+    if (books[isbn]) {
+        books[isbn].reviews[user] = review;
+        return res.status(200).send("Add book review successfully");
+    }
 
-    // Update to the DB
-    books[isbn] = filter_book;
-    return res.status(200).send("Successfully review");
+    return res.status(400).send("Invalid ISBN");
+});
+
+// Delete a book review
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    let isbn = req.params.isbn;
+    let user = req.session.authorization["username"];
+
+    if (books[isbn]) {
+        delete books[isbn].reviews[user];
+        return res.status(200).send("Delete book review successfully");
+    }
+
+    return res.status(400).send("Invalid ISBN");
 });
 
 module.exports.authenticated = regd_users;
